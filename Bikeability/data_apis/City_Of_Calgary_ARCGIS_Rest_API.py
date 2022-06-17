@@ -37,4 +37,9 @@ if __name__ == '__main__':
     y = get_regional_pathways()
     z = get_bike_routes()
     w = get_painted_bike_lanes()
+
+    x.to_file("x.json", driver="GeoJSON")
+    y.to_file("y.json", driver="GeoJSON")
+    z.to_file("z.json", driver="GeoJSON")
+    w.to_file("w.json", driver="GeoJSON")
     print()

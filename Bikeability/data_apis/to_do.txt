@@ -1,0 +1,39 @@
+
+Pre Meeting Prep. Take a look at calgary's Open data portal and find anything I might have missed.
+Git repo has been started use it as needed
+
+Data Processing Task Sheet.
+
+1. Make paths continuous. There are several examples where paths break when passing a street or road.
+    Fix these and make it so on download we pull clean data (download data clean then save)
+
+2. Fix "Bike Routes". Many roads are marked as a bike route yet are pretty dangerous due to speed or traffic volume.
+    Use "Road classification" or any other data to remove dangerous roads from the dataset.
+
+3. Merge in bridges and connectors. I couldn't find in the arcgis documentation tree.
+    This data is available from open data portal. Find how to bring into the project. (https://data.calgary.ca/Recreation-and-Culture/Pathways-Connector-Data/a55h-pcwd)
+4. Upgrades and future projects. I couldn't find in the arcgis documentation tree.
+    This data is available from open data portal. Find how to bring into the project.
+
+Group Next 2
+5. Traffic Count Data from CoC Open Data Portal.        (https://data.calgary.ca/Transportation-Transit/2021-Traffic-Counts-at-Permanent-Stations/4eg2-b9id)
+6. Bike and Ped Count Data from CoC Open Data Portal.   (https://data.calgary.ca/Transportation-Transit/Bike-and-Pedestrian-Counts/pede-tz7g)
+                                                        (https://data.calgary.ca/Transportation-Transit/Bike-Traffic-Count/pubj-un4t)
+Group Next 2
+7. Pull Calgary Regional Transportation Model RTM Zones (https://data.calgary.ca/d/izjs-4mru/visualization
+8. Find Calgary Regional Transportation Model RTM Zones estimates for current and future trip generation
+
+9? Redo what's in git to use the open data portal:  Bikeways: https://data.calgary.ca/Transportation-Transit/Calgary-Bikeways/yigb-2xmq
+                                                    Regional Pathways: https://data.calgary.ca/Recreation-and-Culture/Parks-Pathways/grtb-2v3j
+
+
+
+Analysis:
+
+Group Next 2
+1. Look into "SweepRoutes" to see if there is a better prioritization (https://gis.calgary.ca/arcgis/rest/services/pub_CalgaryDotCa)
+2. Look into "PavmentRehabPlan" to see if there is a better prioritization (https://gis.calgary.ca/arcgis/rest/services/pub_CalgaryDotCa)
+
+3. Heat Map Based on location relative to infrastructure (<10 lines of code)
+
+4. Build a graph representation
