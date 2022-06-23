@@ -12,3 +12,4 @@ pip install pyproj
 pip install six
 pip install rtree
 pip install geopandas
+pip install folium
