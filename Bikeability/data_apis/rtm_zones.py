@@ -2,17 +2,21 @@ import geopandas as gpd
 from sodapy import Socrata
 from shapely import geometry
 
+epsg = 4326
+endpoint = '4c3g-8je3'
+
 def get_rtm_zones():
     #get data and assign to geodataframe
     client = Socrata('data.calgary.ca', None)
-    data = client.get('izjs-4mru', limit=2000)
-    gdf = gpd.GeoDataFrame(data)
+    data = client.get(endpoint, limit=2000)
+    rtm_zones = gpd.GeoDataFrame(data)
     
     #build shapely polygons from coordinates
-    gdf['geometry'] = [geometry.Polygon(gdf['polygon'][i]['coordinates'][0]) for i in range(len(gdf['polygon']))]
-    gdf.drop(columns='polygon', inplace=True)
+    rtm_zones['geometry'] = [geometry.Polygon(rtm_zones['the_geom'][i]['coordinates'][0]) for i in range(len(rtm_zones['the_geom']))]
+    rtm_zones.drop(columns='the_geom', inplace=True)
     
     #set coordiante reference system
-    gdf.set_crs(epsg=4326, inplace=True)
+    rtm_zones.set_crs(epsg=epsg, inplace=True)
     
-    return gdf
+    #return filtered values, City of Calgary only
+    return rtm_zones[rtm_zones['region']=='0']
