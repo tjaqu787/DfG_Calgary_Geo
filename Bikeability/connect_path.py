@@ -45,7 +45,12 @@ graph.to_pickle('data_clean.pkl')
 # maybe use buffer??
 # https://gis.stackexchange.com/questions/365998/how-buffering-works-in-geopandas
 # https://www.codegrepper.com/code-examples/python/find+the+last+point+of+line+geopanda
+buff = graph.buffer(0.2, resolution=1)
+folium.Choropleth(buff, line_weight=2, line_color='red').add_to(map)
+map
 
+
+#%% Calculating Distances Manually
 for i1,v1 in graph.iterrows():
     # matrix of distances between point v1 and v2
     mtx_dist = []
@@ -55,14 +60,15 @@ for i1,v1 in graph.iterrows():
         # https://stackoverflow.com/a/63725180
         pt1 = Point(v1.maxx, v1.maxy)
         pt2 = Point(v2.maxx, v2.maxy)
-        pts_df = gpd.GeoDataFrame({'geometry': [pt1, pt2]})#, crs='EPSG:4326')
+        df1 = gpd.GeoDataFrame({'geometry': [pt1]})#, crs='EPSG:4326')
+        df2 = gpd.GeoDataFrame({'geometry': [pt2]})
         
         # need this?
         # https://stackoverflow.com/questions/63722124/get-distance-between-two-points-in-geopandas
         # https://geobgu.xyz/py/geopandas2.html
-        pts_df2 = pts_df.shift() #We shift the dataframe by 1 to align pnt1 with pnt2
-        dist = pts_df.distance(pts_df2)
-        print('i1:', i1, 'i2:', i2, 'dist:', dist[1])
+        #pts_df2 = pts_df.shift() #We shift the dataframe by 1 to align pnt1 with pnt2
+        dist = df1.distance(df2)
+        print('i1:', i1, 'i2:', i2, 'dist:', dist[0])
 
     # TODO sort to gest the smallest distance
 
