@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import geopandas as gpd
 import numpy as np
 import pickle as pkl
+from shapely.geometry import Point
 
 from data_apis import City_Of_Calgary_ARCGIS_Rest_API as cgy
 
@@ -27,20 +28,53 @@ graph = gpd.GeoDataFrame(columns=['geometry'], crs='EPSG:4326')
 for k,v in lanes.items():
     df_v = gpd.GeoDataFrame(data=v.geometry, columns=['geometry'])
     graph = pd.concat([graph, df_v], axis=0)
-    print(k, ':', v.shape)
 
 # Cleaning
 graph.drop_duplicates(inplace=True)
-# TODO Remove short lines
+graph.reset_index(inplace=True)
 
 # Getting the initial and final point coordinates of each LineString
-graph_bounds = graph.geometry.bounds
+graph = pd.concat([graph, graph.geometry.bounds], axis=1)
+graph.drop('index', axis=1, inplace=True)
 
 # all the paths together
 print('Final graph:', graph.shape)
 
-with open('data_clean.pkl', 'wb') as f:
-    pkl.dump([graph, graph_bounds], f)
+graph.to_pickle('data_clean.pkl')
+
+# maybe use buffer??
+# https://gis.stackexchange.com/questions/365998/how-buffering-works-in-geopandas
+# https://www.codegrepper.com/code-examples/python/find+the+last+point+of+line+geopanda
+
+for i1,v1 in graph.iterrows():
+    # matrix of distances between point v1 and v2
+    mtx_dist = []
+    for i2,v2 in graph.iterrows():
+        if i1 == i2:
+            continue
+        # https://stackoverflow.com/a/63725180
+        pt1 = Point(v1.maxx, v1.maxy)
+        pt2 = Point(v2.maxx, v2.maxy)
+        pts_df = gpd.GeoDataFrame({'geometry': [pt1, pt2]})#, crs='EPSG:4326')
+        
+        # need this?
+        # https://stackoverflow.com/questions/63722124/get-distance-between-two-points-in-geopandas
+        # https://geobgu.xyz/py/geopandas2.html
+        pts_df2 = pts_df.shift() #We shift the dataframe by 1 to align pnt1 with pnt2
+        dist = pts_df.distance(pts_df2)
+        print('i1:', i1, 'i2:', i2, 'dist:', dist[1])
+
+    # TODO sort to gest the smallest distance
+
+    # TODO consider a threshold: sometimes the 'closest' is very far
+
+
+
+
+
+# TODO Remove short lines
+# remove after connecting because some of the small parts might be useful connectors
+
 
 
 
