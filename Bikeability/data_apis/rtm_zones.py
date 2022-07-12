@@ -2,10 +2,11 @@ import geopandas as gpd
 from sodapy import Socrata
 from shapely import geometry
 
-epsg = 4326
-endpoint = '4c3g-8je3'
+
 
 def get_rtm_zones():
+    epsg = 4326
+    endpoint = '4c3g-8je3'
     #get data and assign to geodataframe
     client = Socrata('data.calgary.ca', None)
     data = client.get(endpoint, limit=2000)
@@ -20,3 +21,5 @@ def get_rtm_zones():
     
     #return filtered values, City of Calgary only
     return rtm_zones[rtm_zones['region']=='0']
+
+
