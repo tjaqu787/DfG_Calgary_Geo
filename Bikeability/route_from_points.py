@@ -8,7 +8,7 @@ from shapely.geometry import LineString, Point
 def route_from_points(graph, origin_point, target_point, weight_field=None):
     """
     Finds the shortest path between two points in a graph.
-    :param graph: Graph of linestrings
+    :param graph: Graph of linestring
     :param origin_point: Start point in shapely.geometry.Point format
     :param target_point: Finish point in shapely.geometry.Point format
     :param weight_field: How to weight each linestring
