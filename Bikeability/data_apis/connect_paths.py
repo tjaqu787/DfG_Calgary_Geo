@@ -1,9 +1,9 @@
 import geopandas as gpd
 import numpy as np
-import pandas as pd
-import folium
 from scipy.spatial import cKDTree
-from shapely.geometry import Point, LineString
+from shapely.geometry import LineString
+import folium
+import make_full_path_graph
 
 
 def coords(geom):
@@ -12,8 +12,13 @@ def coords(geom):
 
 def lines_to_coordinates(gdf):
     coordinates = gdf.apply(lambda row: coords(row.geometry), axis=1)
-    coordinates = [x for xs in coordinates for x in xs]
-    coordinates = [[x[1], x[0]] for x in coordinates]
+    coordinates = list_of_tuple_to_list_of_list(coordinates)
+    return coordinates
+
+
+def list_of_tuple_to_list_of_list(list_of_tuples):
+    coordinates = [x for xs in list_of_tuples for x in xs]
+    coordinates = [[x[0], x[1]] for x in coordinates]
     return coordinates
 
 
@@ -27,42 +32,53 @@ def find_linestring_endpoints(line):
 
 def connect_paths(df):
     """
-    :param df: dataframe with geometry linestring column
+    :param df: dataframe with geometry linestring and label columns
     :return: dataframe with connected paths
     """
     df = df.explode(index_parts=False)
-    points = lines_to_coordinates(df)
-    endpoints = df.geometry.apply(find_linestring_endpoints)
-    new_df = tree_nearest(endpoints, points)
-    new_df.crs = df.crs
-    new_df = df.append(new_df)
-    new_df = new_df.geometry.simplify(0.0002)
+    endpoints = list_of_tuple_to_list_of_list(df.geometry.apply(find_linestring_endpoints))
+    new_df = tree_nearest(endpoints, df.crs)
+    new_df = df.merge(new_df, on=['label', 'geometry'], how='outer')
+    print('dissolving')
+    #new_df = new_df.dissolve(by='label')
     return new_df
 
 
-def tree_nearest(ends, points):
-    coordinates = [x for xs in ends for x in xs]
-    coordinates = [[x[1], x[0]] for x in coordinates]
-    endpoints = np.array(coordinates)
-    line_points = np.array(points)
+def tree_nearest(ends, crs, radius=.02):
+    endpoints = np.array(ends)
     kd_tree1 = cKDTree(endpoints)
-    kd_tree2 = cKDTree(points)
-    indexes = kd_tree1.query_ball_tree(kd_tree2, r=0.002)
-    # vectorization? Whats that?
+    indexes = kd_tree1.query_pairs(r=radius)
+    # vectorization? What dat?
+    print('making lines')
     lines = []
-    for i in range(len(indexes)):
-        for j in indexes[i]:
-            lines.append(LineString([(endpoints[i, 0], line_points[j, 0]),(endpoints[i, 1], line_points[j, 1])]))
-    df = pd.DataFrame({'geometry': lines})
-    return df
+    for i in indexes:
+        if (((endpoints[i[0], 0] - endpoints[i[1], 0]) ** 2 + (
+                endpoints[i[0], 1] - endpoints[i[1], 1]) ** 2) ** .5) != 0:
+            lines.append(
+                LineString([(endpoints[i[0], 0], endpoints[i[0], 1]), (endpoints[i[1], 0], endpoints[i[1], 1])]))
+    df = gpd.GeoDataFrame({'geometry': lines, 'label': np.zeros(len(lines))}, crs=crs)
+    df['label'] = 'Connectors'
+    print('dissolving')
+    out_df = gpd.GeoDataFrame(df.head(1))
+    out_df['label'] = '0'
+    parts = 40
+    for i in range(parts):
+        print(f"Part {i}")
+        out_df = out_df.merge(df.iloc[i::parts].dissolve(by='label'), on=['label', 'geometry'], how='outer')
+        print(len(out_df))
+
+    out_df = out_df[out_df['label'] != '0']
+    return out_df
 
 
 if __name__ == '__main__':
-    regional_paths = gpd.read_file('../data_apis/data/y.json')
-    paths = connect_paths(regional_paths)
-    paths.crs = regional_paths.crs
+    trails = make_full_path_graph.get_trails()
+    paths = connect_paths(trails)
+    paths.crs = trails.crs
     map = folium.Map(location=[51.0719, -114.048], tiles="Stamen Terrain", zoom_start=12)
-    folium.Choropleth(regional_paths.geometry,fill_color='red',line_color='red').add_to(map)
-    folium.Choropleth(paths.geometry,fill_color='green',line_color='green').add_to(map)
+    # add the points to the map
+    print('plotting')
+    folium.Choropleth(paths.geometry, fill_color='green', line_color='green').add_to(map)
+    folium.Choropleth(trails.geometry, fill_color='red', line_color='red').add_to(map)
 
     map.save('map.html')
