@@ -6,6 +6,11 @@ from shapely import geometry
 from pandas import concat
 import connect_paths
 
+"""
+Author Tyrell Jaques 2022-08-08
+pulls and saves all data for the calgary bike network
+Labels for pathways= regional_pathways,trails,bike_routes,protected_bike_lanes,painted_bike_lanes,bike_routes
+"""
 
 def meta_data():
     """
