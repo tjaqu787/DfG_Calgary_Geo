@@ -137,8 +137,8 @@ def load_all_parts():
     file_name = "data/all_parts.json"
     if not os.path.exists(file_name):
         df = gpd.GeoDataFrame(
-            concat([get_connectors(), get_regional_pathways(), get_protected_bike_lanes(),
-                    get_painted_bike_lanes(), get_bike_routes()], ignore_index=True), crs=get_connectors().crs)
+            concat([ get_regional_pathways(), get_protected_bike_lanes(),
+                    get_painted_bike_lanes(), get_bike_routes()], ignore_index=True), crs=get_painted_bike_lanes().crs)
         df = df.simplify(0.001, preserve_topology=True)
         df = connect_paths.connect_paths(df)
         df = df.simplify(0.0001, preserve_topology=True)
