@@ -140,9 +140,6 @@ def load_all_parts():
             concat([ get_regional_pathways(), get_protected_bike_lanes(),
                     get_painted_bike_lanes(), get_bike_routes()], ignore_index=True), crs=get_painted_bike_lanes().crs)
         df = df.simplify(0.001, preserve_topology=True)
-        df = connect_paths.connect_paths(df)
-        df = df.simplify(0.0001, preserve_topology=True)
-
         df.to_file(file_name, driver="GeoJSON")
 
     else:
@@ -152,10 +149,4 @@ def load_all_parts():
 
 if __name__ == '__main__':
     map_data = load_all_parts()
-    '''
-    if map == None:
-        map = folium.Map(location=[51.0719, -114.048], tiles="Stamen Terrain", zoom_start=12)
-        print('map')
-    folium.Choropleth(map_data.geometry).add_to(map)
-    map.save('unweighted_path_network.html')
-    '''
+
